@@ -21,6 +21,28 @@ jobs:
           echo "Contenido del proyecto Android:"
           find app -maxdepth 4 -type f | sort | head -100
 
+      - name: Configurar la dirección del sitio Antena TV
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("app/src/main/res/values/strings.xml")
+          if not p.exists():
+              raise SystemExit(f"No se encontró {p}")
+          content = p.read_text(encoding="utf-8")
+          updated, count = re.subn(
+              r'(<string\s+name=["\']app_url["\'][^>]*>).*?(</string>)',
+              r'\g<1>https://antenatv.netlify.app\g<2>',
+              content,
+              count=1,
+              flags=re.DOTALL
+          )
+          if count != 1:
+              raise SystemExit("No se encontró el recurso app_url en strings.xml")
+          p.write_text(updated, encoding="utf-8")
+          print("Dirección configurada: https://antenatv.netlify.app")
+          PY
+
       - name: Instalar Java
         uses: actions/setup-java@v4
         with:
