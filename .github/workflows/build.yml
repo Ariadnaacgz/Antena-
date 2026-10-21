@@ -15,6 +15,12 @@ jobs:
       - name: Descargar el proyecto
         uses: actions/checkout@v4
 
+      - name: Extraer el proyecto Android
+        run: |
+          unzip -o antena-tv-apk.zip
+          echo "Contenido del proyecto Android:"
+          find app -maxdepth 4 -type f | sort | head -100
+
       - name: Instalar Java
         uses: actions/setup-java@v4
         with:
@@ -29,7 +35,7 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Compilar
+      - name: Compilar APK
         run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Guardar el APK como archivo de la ejecución
@@ -37,6 +43,7 @@ jobs:
         with:
           name: antena-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
 
       - name: Publicar el APK en Releases
         env:
@@ -44,4 +51,4 @@ jobs:
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk antena.apk
           gh release delete apk --yes --cleanup-tag || true
-          gh release create apk antena.apk --title "Antena APK" --notes "APK de Antena para Android TV y Fire TV."
+          gh release create apk antena.apk --title "Antena TV APK" --notes "APK de Antena TV para Android."
